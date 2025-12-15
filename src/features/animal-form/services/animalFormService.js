@@ -1,13 +1,21 @@
-import apiClient from '../../../shared/utils/apiClient'
-
 export const animalFormService = {
   createAnimal: async (data) => {
-    const response = await apiClient.post('/animals', data)
-    return response.data
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        console.log("API Create Animal:", data);
+        // En una app real, el backend asignaría ID. Aquí simulamos.
+        // Nota: Esto no persistirá en MOCK_ANIMALS entre recargas porque es JS en browser.
+        resolve({ ...data, id: Date.now().toString() });
+      }, 1000);
+    });
   },
-  
+
   updateAnimal: async (id, data) => {
-    const response = await apiClient.put(`/animals/${id}`, data)
-    return response.data
-  }
-}
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        console.log("API Update Animal:", id, data);
+        resolve({ ...data, id });
+      }, 1000);
+    });
+  },
+};

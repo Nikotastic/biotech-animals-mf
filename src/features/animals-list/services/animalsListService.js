@@ -1,13 +1,12 @@
-import apiClient from '../../../shared/utils/apiClient'
+import { MOCK_ANIMALS } from "../../../shared/mocks/animalsData";
 
 export const animalsListService = {
-  getAnimals: async (filters = {}) => {
-    const response = await apiClient.get('/animals', { params: filters })
-    return response.data
+  getAnimals: async () => {
+    // Simular retardo de red
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(MOCK_ANIMALS);
+      }, 800);
+    });
   },
-  
-  deleteAnimal: async (id) => {
-    const response = await apiClient.delete(`/animals/${id}`)
-    return response.data
-  }
-}
+};
