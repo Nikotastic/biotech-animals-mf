@@ -1,18 +1,13 @@
-import { MOCK_ANIMALS } from "../../../shared/mocks/animalsData";
+import { animalService } from "../../../shared/services/animalService";
 
 export const animalDetailService = {
   getAnimalById: async (id) => {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        const animal = MOCK_ANIMALS.find((a) => a.id === id);
-        if (animal) {
-          resolve(animal);
-        } else {
-       // If the ID does not exist in mock, we return null or error. 
-        // To simulate robustness, we resolve null
-          resolve(null);
-        }
-      }, 600);
-    });
+    try {
+      const data = await animalService.getAnimalById(id);
+      return data;
+    } catch (error) {
+      console.error(`Error fetching animal detail ${id}:`, error);
+      throw error;
+    }
   },
 };

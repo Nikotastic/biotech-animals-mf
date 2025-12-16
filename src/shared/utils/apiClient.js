@@ -1,6 +1,6 @@
 import axios from "axios";
 
-// Cliente de API configurado para el Gateway
+//Client API configured for the Gateway
 const apiClient = axios.create({
   baseURL:
     import.meta.env.VITE_API_GATEWAY_URL ||
@@ -11,7 +11,7 @@ const apiClient = axios.create({
   },
 });
 
-// Interceptor para agregar token JWT en cada petición
+//Interceptor for adding JWT token in each request
 apiClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("auth-storage");
@@ -32,12 +32,12 @@ apiClient.interceptors.request.use(
   }
 );
 
-// Interceptor para manejar errores de autenticación
+//Interceptor for handling authentication errors
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Token inválido o expirado
+      //Invalid or expired token
       localStorage.removeItem("auth-storage");
       window.dispatchEvent(new Event("auth-change"));
       window.location.href = "/login";

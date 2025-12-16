@@ -1,19 +1,23 @@
+import { animalService } from "../../../shared/services/animalService";
+
 export const animalFormService = {
   createAnimal: async (data) => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        console.log("API Create Animal:", data);
-        resolve({ ...data, id: Date.now().toString() });
-      }, 1000);
-    });
+    try {
+      const result = await animalService.createAnimal(data);
+      return result;
+    } catch (error) {
+      console.error("Error creating animal:", error);
+      throw error;
+    }
   },
 
   updateAnimal: async (id, data) => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        console.log("API Update Animal:", id, data);
-        resolve({ ...data, id });
-      }, 1000);
-    });
+    try {
+      const result = await animalService.updateAnimal(id, data);
+      return result;
+    } catch (error) {
+      console.error(`Error updating animal ${id}:`, error);
+      throw error;
+    }
   },
 };
