@@ -1,203 +1,89 @@
-# 🐄 BioTech Animals - Gestión de Animales
+# 🐮 BioTech Animals Microfrontend
 
-Módulo de gestión de inventario de animales para el ERP BioTech.
+<div align="center">
 
-## 🚀 Características
+  <img src="https://biotech-shell.vercel.app/BioTech.webp" alt="BioTech Logo" width="200" />
 
-- **Lista de animales**: Visualización completa del inventario
-- **Registro de animales**: Alta de nuevos ejemplares
-- **Edición de datos**: Actualización de información
-- **Seguimiento**: Historial completo por animal
-- **Filtros avanzados**: Por tipo, raza, edad, estado
-- **Tarjetas individuales**: Vista detallada por animal
-- **Eliminación**: Baja de animales (soft delete)
+![Animals Banner](https://capsule-render.vercel.app/api?type=waving&color=10b981&height=120&section=header&text=Livestock%20Registry&fontSize=70&animation=fadeIn&fontAlignY=40)
 
-## 🛠️ Tecnologías
+  <br />
 
-- React 18
-- Vite + Module Federation
-- React Hook Form + Yup
-- Axios
-- Zustand
-- Tailwind CSS
+[![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
+[![Vite](https://img.shields.io/badge/Vite-B73BFE?style=for-the-badge&logo=vite&logoColor=FFD62E)](https://vitejs.dev/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 
-## 📦 Instalación
+  <br />
 
-```bash
-npm install
-npm run dev  # Puerto 5002
-```
+  <a href="https://biotech-shell.vercel.app/">
+    <img src="https://img.shields.io/badge/🚀_Live_App-Access_Platform-10b981?style=for-the-badge&logo=vercel&logoColor=white" alt="Live Demo" />
+  </a>
+  <a href="https://github.com/Nikotastic/BioTech-Backend">
+    <img src="https://img.shields.io/badge/🔗_Backend_Repo-View_Code-22c55e?style=for-the-badge&logo=github&logoColor=white" alt="Backend Repo" />
+  </a>
 
-## 🔌 Componentes Expuestos
+</div>
 
-```javascript
-// Lista de animales
-import('animalsMF/AnimalsList')
+<br />
 
-// Detalle de animal
-import('animalsMF/AnimalDetail')
+## 📋 Overview
 
-// Formulario de animal
-import('animalsMF/AnimalForm')
+The **Animals Microfrontend** is the core database of the farm. Accessed via the [Shell Application](https://biotech-shell.vercel.app/), it provides detailed profiles, growth tracking, and smart filtering for all livestock.
 
-// Store de animales
-import('animalsMF/AnimalsStore')
-```
+---
 
-## 📁 Estructura
+## ✨ Features
 
-```
-src/
-├── features/
-│   ├── animals-list/
-│   │   ├── components/
-│   │   │   └── AnimalsList.jsx
-│   │   ├── hooks/
-│   │   │   └── useAnimals.js
-│   │   └── services/
-│   │       └── animalsListService.js
-│   ├── animal-detail/
-│   │   ├── components/
-│   │   └── hooks/
-│   └── animal-form/
-│       ├── components/
-│       │   └── AnimalForm.jsx
-│       ├── validations/
-│       │   └── animalSchema.js
-│       └── services/
-├── shared/
-│   ├── store/
-│   │   └── animalsStore.js
-│   ├── constants/
-│   │   └── animalTypes.js
-│   └── utils/
-└── App.jsx
-```
+- **🏷️ Registry**: Detailed profiles for every animal.
+- **📊 Filtering**: Advanced search and categorization.
+- **📈 Growth Tracking**: Monitor weight and development over time.
+- **📱 Responsive Design**: optimized for field use on tablets/phones.
 
-## 🐮 Tipos de Animales
+---
 
-```javascript
-export const ANIMAL_TYPES = {
-  BOVINO: 'Bovino',
-  PORCINO: 'Porcino',
-  OVINO: 'Ovino',
-  CAPRINO: 'Caprino',
-  AVIAR: 'Aviar'
-}
+## 🛠️ Tech Stack
 
-export const ANIMAL_STATUS = {
-  ACTIVE: 'Activo',
-  INACTIVE: 'Inactivo',
-  SOLD: 'Vendido',
-  DECEASED: 'Fallecido'
-}
-```
+- **Framework**: React 19
+- **Build Tool**: Vite
+- **Styling**: TailwindCSS
+- **State**: Zustand
 
-## 🌍 API Endpoints
+---
 
-```javascript
-GET    /api/animals              // Lista de animales
-GET    /api/animals/:id          // Detalle de animal
-POST   /api/animals              // Crear animal
-PUT    /api/animals/:id          // Actualizar animal
-DELETE /api/animals/:id          // Eliminar animal
-GET    /api/animals/stats        // Estadísticas
-```
+## 🚀 Getting Started
 
-## 📝 Schema de Validación
+1.  **Clone & Install**
 
-```javascript
-{
-  name: string().required(),
-  identifier: string().required(),
-  type: string().required(),
-  breed: string().required(),
-  age: number().positive().required(),
-  weight: number().positive().required(),
-  status: string().required()
-}
-```
+    ```bash
+    git clone https://github.com/Nikotastic/biotech-animals-mf.git
+    npm install
+    ```
 
-## 🎨 Uso del Store
+2.  **Run Locally**
+    ```bash
+    npm run dev
+    ```
+    Running on: `http://localhost:5002`
 
-```javascript
-import { useAnimalsStore } from 'animalsMF/AnimalsStore'
+---
 
-const { 
-  animals, 
-  setAnimals, 
-  selectedAnimal, 
-  setSelectedAnimal 
-} = useAnimalsStore()
-```
+## 🤝 Contributing & Credits
 
-## 📊 Datos del Animal
+<div align="center">
 
-```typescript
-interface Animal {
-  id: number
-  name: string
-  identifier: string  // ID único del animal
-  type: string        // Tipo de animal
-  breed: string       // Raza
-  age: number         // Edad en meses
-  weight: number      // Peso en kg
-  gender: string      // Género
-  birthDate: Date     // Fecha de nacimiento
-  status: string      // Estado actual
-  origin: string      // Origen/procedencia
-  motherId?: number   // ID de la madre
-  fatherId?: number   // ID del padre
-  notes?: string      // Observaciones
-}
-```
+**Core Architecture & Development**<br>
+Built with ❤️ by [**@Nikotastic**](https://github.com/Nikotastic)
 
-## 🔍 Filtros Disponibles
+  <br>
 
-- Por tipo de animal
-- Por raza
-- Por rango de edad
-- Por rango de peso
-- Por estado
-- Búsqueda por nombre/identificador
+**UX/UI Design & Creative Direction**<br>
+Special thanks to [**@J2rkan**](https://github.com/J2rkan) for the premium design contributions.
 
-## 📈 Estadísticas
+</div>
 
-- Total de animales
-- Por tipo y raza
-- Por rangos de edad
-- Promedio de peso
-- Estado de salud general
+<br>
 
-## 🚀 Deploy
+---
 
-```bash
-npm run build
-vercel --prod
-```
-
-## 🔗 Integración con otros módulos
-
-### Con Health MF
-```javascript
-// Acceso a registros de salud del animal
-GET /api/animals/:id/health
-```
-
-### Con Reproduction MF
-```javascript
-// Historial reproductivo
-GET /api/animals/:id/reproduction
-```
-
-### Con Feeding MF
-```javascript
-// Plan de alimentación
-GET /api/animals/:id/feeding
-```
-
-## 📞 Contacto
-
-- Email: animals@biotech.com
-- Docs: https://docs.biotech.com/animals
-```
+<div align="center">
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=10b981&height=100&section=footer" width="100%" />
+</div>
