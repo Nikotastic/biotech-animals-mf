@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { animalsListService } from "../services/animalsListService";
-import { useAuthStore } from "../../../shared/store/authStore";
-import { useToastStore } from "../../../shared/store/toastStore";
+import { useAuthStore } from "@shared/store/authStore";
+import { useToastStore } from "@shared/store/toastStore";
 
 export function useAnimals() {
   const [animals, setAnimals] = useState([]);
