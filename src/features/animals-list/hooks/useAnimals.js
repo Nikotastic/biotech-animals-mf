@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
 import { animalsListService } from "../services/animalsListService";
 import { useAuthStore } from "../../../shared/store/authStore";
+import { useToastStore } from "../../../shared/store/toastStore";
 
 export function useAnimals() {
   const [animals, setAnimals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const selectedFarm = useAuthStore((state) => state.selectedFarm);
+  const addToast = useToastStore((state) => state.addToast);
 
   useEffect(() => {
     const fetchAnimals = async () => {
@@ -54,9 +56,11 @@ export function useAnimals() {
               farmId: selectedFarm.id,
             },
           ]);
-          setError(
-            "⚠️ Mostrando datos de demostración. El endpoint de animales está en desarrollo."
+          addToast(
+            "⚠️ Modo Demo: Endpoint 405. Mostrando datos de prueba.",
+            "warning"
           );
+          setError(null);
         } else if (err.response?.status === 404) {
           setAnimals([]);
           setError("No se encontraron animales en esta granja.");
