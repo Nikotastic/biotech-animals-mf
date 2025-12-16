@@ -8,8 +8,8 @@ export const animalDetailService = {
         if (animal) {
           resolve(animal);
         } else {
-          // Si el ID no existe en mock, devolvemos null o error.
-          // Para simular robustez, resolvemos null
+       // If the ID does not exist in mock, we return null or error. 
+        // To simulate robustness, we resolve null
           resolve(null);
         }
       }, 600);

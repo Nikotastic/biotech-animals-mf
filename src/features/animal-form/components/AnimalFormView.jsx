@@ -12,7 +12,7 @@ export function AnimalFormView({
 }) {
   const isEdit = !!animalId;
 
-  // Estado local del formulario inicializado con props o valores por defecto
+  // Local state of the form initialized with props or default values
   const [formData, setFormData] = useState({
     name: initialData?.name || "",
     identifier: initialData?.identifier || "",
@@ -33,7 +33,7 @@ export function AnimalFormView({
 
   const [imagePreview, setImagePreview] = useState(initialData?.image || null);
 
-  // Actualizar estado si llegan datos nuevos (ej: fetch asíncrono)
+  // Update state if new data arrives (in: asynchronous fetch)
   useEffect(() => {
     if (initialData) {
       setFormData((prev) => ({
