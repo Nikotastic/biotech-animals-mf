@@ -14,7 +14,7 @@ import { motion, AnimatePresence } from "framer-motion";
 export function AnimalDetailView({ animal, onBack, onEdit }) {
   const [activeTab, setActiveTab] = useState("general");
 
-  // Valores por defecto si falán datos
+  // Default values ​​if data is missing
   const displayAnimal = {
     name: animal?.name || "Sin Nombre",
     identifier: animal?.identifier || "N/A",
@@ -35,7 +35,7 @@ export function AnimalDetailView({ animal, onBack, onEdit }) {
       "https://images.unsplash.com/photo-1616842610498-6c5f606d69f9?w=800",
   };
 
-  // Mock records si no existen
+  // Mock records if they do not exist
   const healthRecords = animal?.healthRecords || [
     {
       date: "2024-12-01",

@@ -58,7 +58,7 @@ export default function AnimalDetail() {
     );
   }
 
-  // Si no hay loading ni error pero tampoco animal, mostramos error genérico
+  // If there is no loading or error but no animal, we show generic error
   if (!animal) {
     return (
       <div className="flex justify-center items-center h-[50vh]">

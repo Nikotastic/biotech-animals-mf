@@ -3,22 +3,24 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import AnimalsList from "./features/animals-list/components/AnimalsList";
 import AnimalDetail from "./features/animal-detail/components/AnimalDetail";
 import AnimalForm from "./features/animal-form/components/AnimalForm";
-// No importamos App.css porque limpiamos los estilos globales conflictivos
-// import './App.css';
+import { ToastContainer } from "./shared/components/ui/ToastContainer";
 
 function App() {
   return (
-    <BrowserRouter>
-      <div className="container mx-auto p-4">
-        <Routes>
-          <Route path="/" element={<Navigate to="/animals" />} />
-          <Route path="/animals" element={<AnimalsList />} />
-          <Route path="/animals/create" element={<AnimalForm />} />
-          <Route path="/animals/:id" element={<AnimalDetail />} />
-          <Route path="/animals/edit/:id" element={<AnimalForm />} />
-        </Routes>
-      </div>
-    </BrowserRouter>
+    <>
+      <ToastContainer />
+      <BrowserRouter>
+        <div className="container mx-auto p-4">
+          <Routes>
+            <Route path="/" element={<Navigate to="/animals" />} />
+            <Route path="/animals" element={<AnimalsList />} />
+            <Route path="/animals/create" element={<AnimalForm />} />
+            <Route path="/animals/:id" element={<AnimalDetail />} />
+            <Route path="/animals/edit/:id" element={<AnimalForm />} />
+          </Routes>
+        </div>
+      </BrowserRouter>
+    </>
   );
 }
 
