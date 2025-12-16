@@ -1,4 +1,4 @@
-import apiClient from "../../../shared/utils/apiClient";
+import apiClient from "../utils/apiClient";
 
 export const animalService = {
   // Get list of animals
