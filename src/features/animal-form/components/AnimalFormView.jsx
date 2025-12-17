@@ -37,6 +37,11 @@ export function AnimalFormView({
     fatherId: initialData?.fatherId || "",
     status: initialData?.status || initialData?.currentStatus || "Saludable",
     notes: initialData?.notes || "",
+    // IDs for background persistence
+    breedId: initialData?.breedId || null,
+    paddockId: initialData?.paddockId || null,
+    categoryId: initialData?.categoryId || null,
+    initialCost: initialData?.initialCost || "",
   });
 
   const [imagePreview, setImagePreview] = useState(initialData?.image || null);
@@ -95,6 +100,14 @@ export function AnimalFormView({
     }
   }, [initialData]);
 
+  // Update preview when type changes and there is no user image
+  useEffect(() => {
+    if (!imagePreview || imagePreview.includes("unsplash.com")) {
+      const defaultImg = getAnimalImage(formData.type);
+      setImagePreview(defaultImg);
+    }
+  }, [formData.type]);
+
   const handleChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
@@ -108,6 +121,30 @@ export function AnimalFormView({
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const getAnimalImage = (typeStr) => {
+    const type = (typeStr || "").toLowerCase();
+    if (
+      type.includes("bovino") ||
+      type.includes("vaca") ||
+      type.includes("toro")
+    )
+      return "https://images.unsplash.com/photo-1546445317-29f4545e9d53?q=80&w=800&auto=format&fit=crop";
+    if (type.includes("porcino") || type.includes("cerdo"))
+      return "https://images.unsplash.com/photo-1516467508483-a7212febe31a?q=80&w=800&auto=format&fit=crop";
+    if (type.includes("ovino") || type.includes("oveja"))
+      return "https://images.unsplash.com/photo-1484557939439-5838d70889ec?q=80&w=800&auto=format&fit=crop";
+    if (
+      type.includes("avicultura") ||
+      type.includes("pollo") ||
+      type.includes("gallina")
+    )
+      return "https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?q=80&w=800&auto=format&fit=crop";
+    if (type.includes("equino") || type.includes("caballo"))
+      return "https://images.unsplash.com/photo-1553284965-83fd3e82fa5a?q=80&w=800&auto=format&fit=crop";
+
+    return "https://images.unsplash.com/photo-1545468800-85cc9bc6ecf7?q=80&w=800&auto=format&fit=crop";
   };
 
   const handleSubmit = (e) => {
@@ -192,11 +229,18 @@ export function AnimalFormView({
                   <img
                     src={imagePreview}
                     alt="Preview"
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
-                    <Camera className="w-12 h-12 text-green-300 group-hover:text-green-400 transition-colors" />
+                    <img
+                      src={getAnimalImage(formData.type)}
+                      alt="Placeholder"
+                      className="w-full h-full object-cover opacity-60"
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <Camera className="w-12 h-12 text-white drop-shadow-lg" />
+                    </div>
                   </div>
                 )}
               </div>
@@ -258,6 +302,9 @@ export function AnimalFormView({
                         ...prev,
                         categoryId: id,
                         type: cat?.name || "",
+                        // Reset breed when category changes to avoid "Cerdo" with "Holstein"
+                        breedId: "",
+                        breed: "",
                       }));
                     }}
                     className="w-full px-4 py-3 border border-green-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white text-gray-700"
@@ -273,7 +320,23 @@ export function AnimalFormView({
                 ) : (
                   <select
                     value={formData.type}
-                    onChange={(e) => handleChange("type", e.target.value)}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      const mappings = {
+                        Bovino: 1,
+                        Porcino: 2,
+                        Ovino: 3,
+                        Avicultura: 5,
+                      };
+                      setFormData((prev) => ({
+                        ...prev,
+                        type: val,
+                        categoryId: mappings[val] || null,
+                        // Reset breed to avoid inconsistencies
+                        breedId: "",
+                        breed: "",
+                      }));
+                    }}
                     className="w-full px-4 py-3 border border-green-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white text-gray-700"
                     required
                   >
@@ -305,11 +368,17 @@ export function AnimalFormView({
                     required
                   >
                     <option value="">Seleccionar Raza</option>
-                    {resources.breeds.map((b) => (
-                      <option key={b.id} value={b.id}>
-                        {b.name}
-                      </option>
-                    ))}
+                    {resources.breeds
+                      .filter(
+                        (b) =>
+                          !formData.categoryId ||
+                          b.categoryId == formData.categoryId
+                      )
+                      .map((b) => (
+                        <option key={b.id} value={b.id}>
+                          {b.name}
+                        </option>
+                      ))}
                   </select>
                 </div>
               ) : (

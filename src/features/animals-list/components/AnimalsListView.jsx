@@ -12,6 +12,7 @@ import {
   Beef,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import alertService from "@shared/utils/alertService";
 
 export function AnimalsListView({
   animals,
@@ -34,11 +35,12 @@ export function AnimalsListView({
 
   const filteredAnimals = safeAnimals.filter((animal) => {
     const name = animal.name || "";
-    const identifier = animal.identifier || "";
+    const identifier = animal.identifier || animal.visualCode || "";
+    const type = animal.type || animal.categoryName || "";
     const matchesSearch =
       name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       identifier.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filterType === "all" || animal.type === filterType;
+    const matchesFilter = filterType === "all" || type === filterType;
     return matchesSearch && matchesFilter;
   });
 
@@ -53,6 +55,33 @@ export function AnimalsListView({
       default:
         return "bg-gray-100 text-gray-700 border-gray-200";
     }
+  };
+
+  const getAnimalImage = (animal) => {
+    if (animal.image && !animal.image.includes("placeholder"))
+      return animal.image;
+
+    const type = (animal.type || animal.categoryName || "").toLowerCase();
+    if (
+      type.includes("bovino") ||
+      type.includes("vaca") ||
+      type.includes("toro")
+    )
+      return "https://images.unsplash.com/photo-1546445317-29f4545e9d53?q=80&w=800&auto=format&fit=crop";
+    if (type.includes("porcino") || type.includes("cerdo"))
+      return "https://images.unsplash.com/photo-1516467508483-a7212febe31a?q=80&w=800&auto=format&fit=crop";
+    if (type.includes("ovino") || type.includes("oveja"))
+      return "https://images.unsplash.com/photo-1484557939439-5838d70889ec?q=80&w=800&auto=format&fit=crop";
+    if (
+      type.includes("avicultura") ||
+      type.includes("pollo") ||
+      type.includes("gallina")
+    )
+      return "https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?q=80&w=800&auto=format&fit=crop";
+    if (type.includes("equino") || type.includes("caballo"))
+      return "https://images.unsplash.com/photo-1553284965-83fd3e82fa5a?q=80&w=800&auto=format&fit=crop";
+
+    return "https://images.unsplash.com/photo-1545468800-85cc9bc6ecf7?q=80&w=800&auto=format&fit=crop";
   };
 
   return (
@@ -199,7 +228,7 @@ export function AnimalsListView({
                 {/* Image */}
                 <div className="relative h-56 overflow-hidden">
                   <img
-                    src={animal.image}
+                    src={getAnimalImage(animal)}
                     alt={animal.name}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                   />
@@ -209,7 +238,7 @@ export function AnimalsListView({
                     <span
                       className={`px-3 py-1 rounded-full text-xs font-bold text-gray-700 bg-white/90 backdrop-blur shadow-sm`}
                     >
-                      {animal.type}
+                      {animal.type || animal.categoryName || "Bovino"}
                     </span>
                   </div>
 
@@ -218,7 +247,7 @@ export function AnimalsListView({
                       {animal.name}
                     </h3>
                     <p className="text-white/80 text-sm font-medium">
-                      {animal.identifier}
+                      {animal.identifier || animal.visualCode}
                     </p>
                   </div>
 
@@ -241,38 +270,57 @@ export function AnimalsListView({
                     <div className="flex justify-between items-center text-gray-600">
                       <span className="font-medium">Raza</span>
                       <span className="text-gray-900 font-semibold">
-                        {animal.breed}
+                        {animal.breedName || animal.breed || "No especificada"}
                       </span>
                     </div>
                     <div className="flex justify-between items-center text-gray-600">
                       <span className="font-medium">Peso</span>
-                      <span className="text-gray-900 font-semibold">
-                        {animal.weight} kg
+                      <span className="text-gray-900 font-semibold text-emerald-600">
+                        {animal.weight || animal.currentWeight || "0"} kg
                       </span>
                     </div>
                     <div className="flex justify-between items-center text-gray-600">
                       <span className="font-medium">Ubicación</span>
-                      <span className="px-2 py-0.5 bg-gray-100 rounded text-gray-700 text-xs font-bold">
-                        {animal.location}
+                      <span className="px-2 py-0.5 bg-green-50 text-green-700 rounded text-xs font-bold border border-green-100">
+                        {animal.location ||
+                          animal.paddockName ||
+                          "Sin ubicación"}
                       </span>
                     </div>
                   </div>
 
                   {/* Actions */}
-                  <div className="grid grid-cols-2 gap-3 pt-4 border-t border-gray-100">
+                  <div className="flex flex-col gap-2 pt-4 border-t border-gray-100">
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        onClick={() => onViewDetails(animal.id)}
+                        className="flex items-center justify-center gap-2 bg-gray-50 text-gray-700 hover:bg-gray-100 py-2 rounded-xl font-semibold text-xs transition-colors"
+                      >
+                        <Eye className="w-4 h-4" />
+                        Detalles
+                      </button>
+                      <button
+                        onClick={() => onEdit(animal.id)}
+                        className="flex items-center justify-center gap-2 bg-green-50 text-green-700 hover:bg-green-100 py-2 rounded-xl font-semibold text-xs transition-colors"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                        Editar
+                      </button>
+                    </div>
                     <button
-                      onClick={() => onViewDetails(animal.id)}
-                      className="flex items-center justify-center gap-2 bg-gray-50 text-gray-700 hover:bg-gray-100 py-2.5 rounded-xl font-semibold text-sm transition-colors"
+                      onClick={async () => {
+                        const result = await alertService.deleteConfirm(
+                          animal.name,
+                          "¿Estás seguro de eliminar este animal?"
+                        );
+                        if (result.isConfirmed) {
+                          onDelete?.(animal.id);
+                        }
+                      }}
+                      className="flex items-center justify-center gap-2 bg-red-50 text-red-600 hover:bg-red-100 py-2 rounded-xl font-semibold text-xs transition-colors w-full"
                     >
-                      <Eye className="w-4 h-4" />
-                      Detalles
-                    </button>
-                    <button
-                      onClick={() => onEdit(animal.id)}
-                      className="flex items-center justify-center gap-2 bg-green-50 text-green-700 hover:bg-green-100 py-2.5 rounded-xl font-semibold text-sm transition-colors"
-                    >
-                      <Edit2 className="w-4 h-4" />
-                      Editar
+                      <Trash2 className="w-4 h-4" />
+                      Eliminar
                     </button>
                   </div>
                 </div>
@@ -300,7 +348,7 @@ export function AnimalsListView({
                 >
                   <div className="flex gap-4">
                     <img
-                      src={animal.image}
+                      src={getAnimalImage(animal)}
                       alt=""
                       className="w-20 h-20 rounded-xl object-cover shadow-sm flex-shrink-0"
                     />
@@ -311,7 +359,7 @@ export function AnimalsListView({
                             {animal.name}
                           </h4>
                           <span className="text-xs font-semibold text-green-600 bg-green-50 px-2 py-0.5 rounded-md inline-block">
-                            {animal.identifier}
+                            {animal.identifier || animal.visualCode}
                           </span>
                         </div>
                         <span
@@ -327,7 +375,7 @@ export function AnimalsListView({
                         <div>
                           <span className="text-gray-500">Tipo:</span>
                           <span className="text-gray-900 font-medium ml-1">
-                            {animal.type}
+                            {animal.type || animal.categoryName || "Bovino"}
                           </span>
                         </div>
                         <div>
@@ -366,12 +414,12 @@ export function AnimalsListView({
                           <span>Editar</span>
                         </button>
                         <button
-                          onClick={() => {
-                            if (
-                              window.confirm(
-                                "¿Estás seguro de eliminar este animal?"
-                              )
-                            ) {
+                          onClick={async () => {
+                            const result = await alertService.deleteConfirm(
+                              animal.name,
+                              "¿Estás seguro de eliminar este animal?"
+                            );
+                            if (result.isConfirmed) {
                               onDelete?.(animal.id);
                             }
                           }}
@@ -421,7 +469,7 @@ export function AnimalsListView({
                       <td className="py-4 px-6">
                         <div className="flex items-center gap-4">
                           <img
-                            src={animal.image}
+                            src={getAnimalImage(animal)}
                             alt=""
                             className="w-12 h-12 rounded-xl object-cover shadow-sm"
                           />
@@ -430,7 +478,7 @@ export function AnimalsListView({
                               {animal.name}
                             </h4>
                             <span className="text-xs font-semibold text-green-600 bg-green-50 px-2 py-0.5 rounded-md">
-                              {animal.identifier}
+                              {animal.identifier || animal.visualCode}
                             </span>
                           </div>
                         </div>
@@ -438,7 +486,7 @@ export function AnimalsListView({
                       <td className="py-4 px-6">
                         <div className="flex flex-col">
                           <span className="text-gray-900 font-medium">
-                            {animal.type}
+                            {animal.type || animal.categoryName || "Bovino"}
                           </span>
                           <span className="text-gray-500 text-sm">
                             {animal.breed}
@@ -479,12 +527,12 @@ export function AnimalsListView({
                             <Edit2 className="w-5 h-5" />
                           </button>
                           <button
-                            onClick={() => {
-                              if (
-                                window.confirm(
-                                  "¿Estás seguro de eliminar este animal?"
-                                )
-                              ) {
+                            onClick={async () => {
+                              const result = await alertService.deleteConfirm(
+                                animal.name,
+                                "¿Estás seguro de eliminar este animal?"
+                              );
+                              if (result.isConfirmed) {
                                 onDelete?.(animal.id);
                               }
                             }}

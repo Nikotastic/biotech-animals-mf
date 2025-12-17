@@ -32,27 +32,37 @@ export default function AnimalForm() {
     movementTypes: [],
   });
 
+  const user = useAuthStore((state) => state.user);
+
   useEffect(() => {
     const fetchResources = async () => {
       try {
-        const [breeds, categories, paddocks, batches, movementTypes] =
-          await Promise.all([
-            animalService.getBreeds(),
-            animalService.getCategories(),
-            animalService.getPaddocks(
-              selectedFarm?.id ? { farmId: selectedFarm.id } : {}
-            ),
-            animalService.getBatches(
-              selectedFarm?.id ? { farmId: selectedFarm.id } : {}
-            ),
-            animalService.getMovementTypes(),
-          ]);
+        const [
+          breedsRes,
+          categoriesRes,
+          paddocksRes,
+          batchesRes,
+          movementTypesRes,
+        ] = await Promise.all([
+          animalService.getBreeds(),
+          animalService.getCategories(),
+          animalService.getPaddocks(
+            selectedFarm?.id ? { farmId: selectedFarm.id } : {}
+          ),
+          animalService.getBatches(
+            selectedFarm?.id ? { farmId: selectedFarm.id } : {}
+          ),
+          animalService.getMovementTypes(),
+        ]);
+
+        const getList = (res) => (Array.isArray(res) ? res : res?.data || []);
+
         setResources({
-          breeds: Array.isArray(breeds) ? breeds : [],
-          categories: Array.isArray(categories) ? categories : [],
-          paddocks: Array.isArray(paddocks) ? paddocks : [],
-          batches: Array.isArray(batches) ? batches : [],
-          movementTypes: Array.isArray(movementTypes) ? movementTypes : [],
+          breeds: getList(breedsRes),
+          categories: getList(categoriesRes),
+          paddocks: getList(paddocksRes),
+          batches: getList(batchesRes),
+          movementTypes: getList(movementTypesRes),
         });
       } catch (err) {
         console.error("Error loading resources:", err);
@@ -65,22 +75,33 @@ export default function AnimalForm() {
     try {
       // Map frontend data to Backend DTO
       const animalDto = {
-        id: id ? parseInt(id) : undefined, // Necessary for UpdateAnimal ID mismatch check
+        id: id ? parseInt(id) : undefined,
         visualCode: formData.identifier,
         birthDate: formData.birthDate || null,
         name: formData.name,
         initialCost: formData.initialCost
           ? parseFloat(formData.initialCost)
           : 0,
-        breedId: formData.breedId || undefined,
-        categoryId: formData.categoryId || undefined,
+        // Ensure ID is number. Fallback to searching in resources if ID is missing but name exists
+        breedId: formData.breedId
+          ? parseInt(formData.breedId)
+          : resources.breeds.find((b) => b.name === formData.breed)?.id ||
+            undefined,
+        categoryId: formData.categoryId
+          ? parseInt(formData.categoryId)
+          : resources.categories.find((c) => c.name === formData.type)?.id ||
+            undefined,
+        weight: formData.weight ? parseFloat(formData.weight) : undefined,
+        height: formData.height ? parseFloat(formData.height) : undefined,
+        paddockId: formData.paddockId
+          ? parseInt(formData.paddockId)
+          : resources.paddocks.find((p) => p.name === formData.location)?.id ||
+            undefined,
+        sex: formData.gender === "Macho" ? "M" : "F",
+        farmId: selectedFarm?.id || undefined,
       };
 
-      // Fields only for creation
-      if (!id) {
-        animalDto.farmId = selectedFarm?.id || 1; // Fallback to 1 for dev if no farm selected (avoid 0)
-        animalDto.sex = formData.gender === "Macho" ? "M" : "F";
-      }
+      console.log("Saving Animal DTO:", animalDto);
 
       if (id) {
         // Update might use a different DTO, but usually similar structure
@@ -89,9 +110,10 @@ export default function AnimalForm() {
         // Handle Weight Update if provided
         if (formData.weight) {
           const weightPayload = {
+            id: id ? parseInt(id) : undefined, // Some endpoints expect ID in payload too
             weight: parseFloat(formData.weight),
             date: new Date().toISOString().split("T")[0],
-            userId: 1, // TODO: Get from auth
+            userId: user?.id || 1,
           };
           try {
             await animalService.updateWeight(id, weightPayload);
@@ -119,7 +141,7 @@ export default function AnimalForm() {
               toPaddockId: parseInt(formData.paddockId),
               movementDate: new Date().toISOString().split("T")[0],
               observations: "Cambio de ubicación desde edición",
-              userId: 1,
+              userId: user?.id || 1,
             };
             try {
               await animalService.registerMovement(id, movementPayload);
@@ -147,18 +169,49 @@ export default function AnimalForm() {
           return;
         }
         const newAnimal = await createAnimal(animalDto);
+        const createdAnimalId = newAnimal?.data?.id || newAnimal?.id;
 
-        // If weight provided on creation, maybe distinct call is needed?
-        // Usually creation might include weight if DTO supports it, but RegisterAnimalCommand does NOT.
-        // So we should try to update weight immediately after creation if we have the ID.
-        if (newAnimal?.id && formData.weight) {
-          // ... same logic for weight
+        // If weight provided on creation, try to update it using the new ID
+        if (createdAnimalId && formData.weight) {
           const weightPayload = {
             weight: parseFloat(formData.weight),
             date: new Date().toISOString().split("T")[0],
-            userId: 1,
+            userId: user?.id || 1,
           };
-          await animalService.updateWeight(newAnimal.id, weightPayload); // silent try
+          try {
+            await animalService.updateWeight(createdAnimalId, weightPayload);
+          } catch (e) {
+            console.warn("Initial weight update failed", e);
+          }
+        }
+
+        // If paddock provided on creation, try to register initial movement
+        if (createdAnimalId && formData.paddockId) {
+          const moveType =
+            resources.movementTypes?.find(
+              (mt) =>
+                mt.name?.toLowerCase().includes("entrada") ||
+                mt.name?.toLowerCase().includes("inicio") ||
+                mt.name?.toLowerCase().includes("traslado")
+            ) || resources.movementTypes?.[0];
+
+          if (moveType) {
+            const movementPayload = {
+              movementTypeId: moveType.id,
+              toPaddockId: parseInt(formData.paddockId),
+              movementDate: new Date().toISOString().split("T")[0],
+              observations: "Ubicación inicial tras registro",
+              userId: user?.id || 1,
+            };
+            try {
+              await animalService.registerMovement(
+                createdAnimalId,
+                movementPayload
+              );
+            } catch (e) {
+              console.warn("Initial movement registration failed", e);
+            }
+          }
         }
 
         alertService.success(
