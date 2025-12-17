@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Save, X, Upload, Camera } from "lucide-react";
+import { Save, X, Upload, Camera, DollarSign, Trash2 } from "lucide-react";
 import { motion } from "framer-motion";
 
 export function AnimalFormView({
@@ -9,16 +9,24 @@ export function AnimalFormView({
   onCancel,
   isSaving,
   saveError,
+  resources = { breeds: [], categories: [], paddocks: [], batches: [] },
+  onDelete,
 }) {
   const isEdit = !!animalId;
 
   // Local state of the form initialized with props or default values
   const [formData, setFormData] = useState({
     name: initialData?.name || "",
-    identifier: initialData?.identifier || "",
+    identifier: initialData?.identifier || initialData?.visualCode || "",
     type: initialData?.type || "Bovino",
-    breed: initialData?.breed || "",
-    gender: initialData?.gender || "Macho",
+    breed: initialData?.breed || initialData?.breedName || "",
+    gender:
+      initialData?.gender ||
+      (initialData?.sex === "M"
+        ? "Macho"
+        : initialData?.sex === "F"
+        ? "Hembra"
+        : "Macho"),
     birthDate: initialData?.birthDate
       ? new Date(initialData.birthDate).toISOString().split("T")[0]
       : "",
@@ -27,7 +35,7 @@ export function AnimalFormView({
     location: initialData?.location || "",
     motherId: initialData?.motherId || "",
     fatherId: initialData?.fatherId || "",
-    status: initialData?.status || "Saludable",
+    status: initialData?.status || initialData?.currentStatus || "Saludable",
     notes: initialData?.notes || "",
   });
 
@@ -36,13 +44,53 @@ export function AnimalFormView({
   // Update state if new data arrives (in: asynchronous fetch)
   useEffect(() => {
     if (initialData) {
-      setFormData((prev) => ({
-        ...prev,
-        ...initialData,
-        birthDate: initialData.birthDate
-          ? new Date(initialData.birthDate).toISOString().split("T")[0]
-          : prev.birthDate,
-      }));
+      setFormData((prev) => {
+        // Create new state based on initialData but falling back to empty strings for inputs
+        // to prevent "controlled to uncontrolled" warning
+        return {
+          ...prev,
+          ...initialData,
+          name: initialData.name || "",
+          identifier:
+            initialData.identifier ||
+            initialData.visualCode ||
+            prev.identifier ||
+            "",
+          type:
+            initialData.type ||
+            initialData.categoryName ||
+            prev.type ||
+            "Bovino",
+          breed: initialData.breed || initialData.breedName || prev.breed || "",
+          gender:
+            initialData.gender ||
+            (initialData.sex === "M"
+              ? "Macho"
+              : initialData.sex === "F"
+              ? "Hembra"
+              : prev.gender) ||
+            "Macho",
+          status:
+            initialData.status ||
+            initialData.currentStatus ||
+            prev.status ||
+            "Saludable",
+          birthDate: initialData.birthDate
+            ? new Date(initialData.birthDate).toISOString().split("T")[0]
+            : prev.birthDate || "",
+          weight: initialData.weight || "",
+          height: initialData.height || "",
+          location: initialData.location || initialData.paddockName || "",
+          motherId: initialData.motherId || "",
+          fatherId: initialData.fatherId || "",
+          notes: initialData.notes || "",
+          initialCost: initialData.initialCost || prev.initialCost || "",
+          // Hidden IDs for persistence
+          breedId: initialData.breedId || prev.breedId || null,
+          paddockId: initialData.paddockId || prev.paddockId || null,
+          categoryId: initialData.categoryId || prev.categoryId || null,
+        };
+      });
       if (initialData.image) setImagePreview(initialData.image);
     }
   }, [initialData]);
@@ -200,26 +248,79 @@ export function AnimalFormView({
                 <label className="block text-green-700 font-medium mb-2">
                   Tipo de Animal *
                 </label>
-                <select
-                  value={formData.type}
-                  onChange={(e) => handleChange("type", e.target.value)}
-                  className="w-full px-4 py-3 border border-green-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white text-gray-700"
-                  required
-                >
-                  <option value="Bovino">Bovino</option>
-                  <option value="Porcino">Porcino</option>
-                  <option value="Ovino">Ovino</option>
-                  <option value="Avicultura">Avicultura</option>
-                </select>
+                {resources.categories?.length > 0 ? (
+                  <select
+                    value={formData.categoryId || ""}
+                    onChange={(e) => {
+                      const id = e.target.value;
+                      const cat = resources.categories.find((c) => c.id == id);
+                      setFormData((prev) => ({
+                        ...prev,
+                        categoryId: id,
+                        type: cat?.name || "",
+                      }));
+                    }}
+                    className="w-full px-4 py-3 border border-green-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white text-gray-700"
+                    required
+                  >
+                    <option value="">Seleccionar Tipo</option>
+                    {resources.categories.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <select
+                    value={formData.type}
+                    onChange={(e) => handleChange("type", e.target.value)}
+                    className="w-full px-4 py-3 border border-green-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white text-gray-700"
+                    required
+                  >
+                    <option value="Bovino">Bovino</option>
+                    <option value="Porcino">Porcino</option>
+                    <option value="Ovino">Ovino</option>
+                    <option value="Avicultura">Avicultura</option>
+                  </select>
+                )}
               </div>
 
-              <InputGroup
-                label="Raza *"
-                value={formData.breed}
-                onChange={(e) => handleChange("breed", e.target.value)}
-                placeholder="Ej: Holstein"
-                required
-              />
+              {resources.breeds?.length > 0 ? (
+                <div>
+                  <label className="block text-green-700 font-medium mb-2">
+                    Raza *
+                  </label>
+                  <select
+                    value={formData.breedId || ""}
+                    onChange={(e) => {
+                      const id = e.target.value;
+                      const breed = resources.breeds.find((b) => b.id == id);
+                      setFormData((prev) => ({
+                        ...prev,
+                        breedId: id,
+                        breed: breed?.name || "",
+                      }));
+                    }}
+                    className="w-full px-4 py-3 border border-green-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white text-gray-700"
+                    required
+                  >
+                    <option value="">Seleccionar Raza</option>
+                    {resources.breeds.map((b) => (
+                      <option key={b.id} value={b.id}>
+                        {b.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ) : (
+                <InputGroup
+                  label="Raza *"
+                  value={formData.breed}
+                  onChange={(e) => handleChange("breed", e.target.value)}
+                  placeholder="Ej: Holstein"
+                  required
+                />
+              )}
 
               <div>
                 <label className="block text-green-700 font-medium mb-2">
@@ -253,6 +354,14 @@ export function AnimalFormView({
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <InputGroup
+                label="Costo Inicial"
+                type="number"
+                step="0.01"
+                value={formData.initialCost}
+                onChange={(e) => handleChange("initialCost", e.target.value)}
+                placeholder="0.00"
+              />
+              <InputGroup
                 label="Peso (kg) *"
                 type="number"
                 step="0.1"
@@ -270,13 +379,42 @@ export function AnimalFormView({
                 placeholder="0"
               />
 
-              <InputGroup
-                label="Ubicación *"
-                value={formData.location}
-                onChange={(e) => handleChange("location", e.target.value)}
-                placeholder="Ej: Corral A-3"
-                required
-              />
+              {resources.paddocks?.length > 0 ? (
+                <div>
+                  <label className="block text-green-700 font-medium mb-2">
+                    Ubicación *
+                  </label>
+                  <select
+                    value={formData.paddockId || ""}
+                    onChange={(e) => {
+                      const id = e.target.value;
+                      const pad = resources.paddocks.find((p) => p.id == id);
+                      setFormData((prev) => ({
+                        ...prev,
+                        paddockId: id,
+                        location: pad?.name || "",
+                      }));
+                    }}
+                    className="w-full px-4 py-3 border border-green-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white text-gray-700"
+                    required
+                  >
+                    <option value="">Seleccionar Ubicación</option>
+                    {resources.paddocks.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ) : (
+                <InputGroup
+                  label="Ubicación *"
+                  value={formData.location}
+                  onChange={(e) => handleChange("location", e.target.value)}
+                  placeholder="Ej: Corral A-3"
+                  required
+                />
+              )}
             </div>
           </div>
 
@@ -341,6 +479,21 @@ export function AnimalFormView({
 
           {/* Action Buttons */}
           <div className="flex flex-col-reverse md:flex-row gap-4 pt-4 border-t border-green-50">
+            {isEdit && (
+              <motion.button
+                type="button"
+                onClick={onDelete}
+                disabled={isSaving}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="px-6 py-4 bg-red-50 border-2 border-red-100 text-red-600 font-bold rounded-xl hover:bg-red-100 transition-all text-center flex items-center justify-center gap-2"
+                title="Eliminar Animal"
+              >
+                <Trash2 className="w-5 h-5" />
+                <span className="hidden md:inline">Eliminar</span>
+              </motion.button>
+            )}
+
             <motion.button
               type="button"
               onClick={onCancel}

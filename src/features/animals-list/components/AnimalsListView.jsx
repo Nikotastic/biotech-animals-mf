@@ -30,10 +30,14 @@ export function AnimalsListView({
   const [filterType, setFilterType] = useState("all");
   const [viewMode, setViewMode] = useState("grid");
 
-  const filteredAnimals = animals.filter((animal) => {
+  const safeAnimals = Array.isArray(animals) ? animals : [];
+
+  const filteredAnimals = safeAnimals.filter((animal) => {
+    const name = animal.name || "";
+    const identifier = animal.identifier || "";
     const matchesSearch =
-      animal.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      animal.identifier.toLowerCase().includes(searchTerm.toLowerCase());
+      name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      identifier.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter = filterType === "all" || animal.type === filterType;
     return matchesSearch && matchesFilter;
   });

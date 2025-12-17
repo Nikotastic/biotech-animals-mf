@@ -17,17 +17,24 @@ export function AnimalDetailView({ animal, onBack, onEdit }) {
   // Default values ​​if data is missing
   const displayAnimal = {
     name: animal?.name || "Sin Nombre",
-    identifier: animal?.identifier || "N/A",
-    type: animal?.type || "Desconocido",
-    breed: animal?.breed || "Desconocida",
-    gender: animal?.gender || "N/A",
+    identifier: animal?.identifier || animal?.visualCode || "N/A",
+    type: animal?.type || animal?.categoryName || "Desconocido",
+    breed: animal?.breed || animal?.breedName || "Desconocida",
+    gender:
+      animal?.gender ||
+      (animal?.sex === "M"
+        ? "Macho"
+        : animal?.sex === "F"
+        ? "Hembra"
+        : animal?.sex) ||
+      "N/A",
     birthDate: animal?.birthDate
       ? new Date(animal.birthDate).toLocaleDateString()
       : "N/A",
     weight: animal?.weight || 0,
     height: animal?.height || 0,
-    status: animal?.status || "Desconocido",
-    location: animal?.location || "Sin asignar",
+    status: animal?.status || animal?.currentStatus || "Desconocido",
+    location: animal?.location || animal?.paddockName || "Sin asignar",
     motherId: animal?.motherId || "N/A",
     fatherId: animal?.fatherId || "N/A",
     image:
