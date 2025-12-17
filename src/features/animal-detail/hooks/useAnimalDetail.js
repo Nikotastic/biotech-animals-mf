@@ -20,7 +20,9 @@ export function useAnimalDetail(id) {
         if (!data) {
           setError("Animal no encontrado");
         } else {
-          setAnimal(data);
+          // Handle ApiResponse wrapper
+          const animalData = data.data || data;
+          setAnimal(animalData);
           setError(null);
         }
       } catch (err) {

@@ -122,6 +122,63 @@ export const animalService = {
       throw error;
     }
   },
+  // Get breeds
+  getBreeds: async () => {
+    try {
+      const response = await apiClient.get("/v1/breeds");
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching breeds:", error);
+      return [];
+    }
+  },
+
+  // Get categories
+  getCategories: async () => {
+    try {
+      const response = await apiClient.get("/v1/categories");
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+      return [];
+    }
+  },
+
+  // Get paddocks
+  getPaddocks: async (filters = {}) => {
+    try {
+      const params = new URLSearchParams(filters).toString();
+      const url = params ? `/v1/paddocks?${params}` : "/v1/paddocks";
+      const response = await apiClient.get(url);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching paddocks:", error);
+      return [];
+    }
+  },
+
+  // Get batches
+  getBatches: async (filters = {}) => {
+    try {
+      const params = new URLSearchParams(filters).toString();
+      const url = params ? `/v1/batches?${params}` : "/v1/batches";
+      const response = await apiClient.get(url);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching batches:", error);
+      return [];
+    }
+  },
+  // Get movement types
+  getMovementTypes: async () => {
+    try {
+      const response = await apiClient.get("/v1/movement-types");
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching movement types:", error);
+      return [];
+    }
+  },
 };
 
 export default animalService;

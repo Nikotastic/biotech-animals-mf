@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { animalService } from "@shared/services/animalService";
 import { useAuthStore } from "@shared/store/authStore";
-import { useToastStore } from "@shared/store/toastStore";
+import alertService from "@shared/utils/alertService";
 
 export function useAnimals() {
   const [animals, setAnimals] = useState([]);
@@ -9,7 +9,6 @@ export function useAnimals() {
   const [error, setError] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
   const selectedFarm = useAuthStore((state) => state.selectedFarm);
-  const addToast = useToastStore((state) => state.addToast);
 
   const fetchAnimals = useCallback(async () => {
     try {
@@ -22,10 +21,14 @@ export function useAnimals() {
         return;
       }
 
-      const data = await animalService.getAnimals({
+      const response = await animalService.getAnimals({
         farmId: selectedFarm.id,
       });
-      setAnimals(data);
+      // Handle ApiResponse wrapper { data: [...], success: true }
+      const animalsList = Array.isArray(response)
+        ? response
+        : response.data || [];
+      setAnimals(animalsList);
       setError(null);
     } catch (err) {
       console.error("Error fetching animals:", err);
@@ -56,9 +59,9 @@ export function useAnimals() {
             farmId: selectedFarm.id,
           },
         ]);
-        addToast(
-          `⚠️ Modo Demo: Error ${err.response?.status} en el servidor. Mostrando datos de prueba.`,
-          "warning"
+        alertService.warning(
+          `Modo Demo: Error ${err.response?.status} en el servidor. Mostrando datos de prueba.`,
+          "Modo Demo"
         );
         setError(null);
       } else if (err.response?.status === 404) {
@@ -70,7 +73,7 @@ export function useAnimals() {
     } finally {
       setLoading(false);
     }
-  }, [selectedFarm?.id, addToast]);
+  }, [selectedFarm?.id]);
 
   useEffect(() => {
     fetchAnimals();
@@ -81,12 +84,12 @@ export function useAnimals() {
     try {
       setActionLoading(true);
       await animalService.updateWeight(animalId, weightData);
-      addToast("✅ Peso actualizado correctamente", "success");
+      alertService.success("Peso actualizado correctamente", "Éxito");
       await fetchAnimals(); // Refresh list
       return true;
     } catch (err) {
       console.error("Error updating weight:", err);
-      addToast("❌ Error al actualizar el peso", "error");
+      alertService.error("Error al actualizar el peso", "Error");
       return false;
     } finally {
       setActionLoading(false);
@@ -98,12 +101,12 @@ export function useAnimals() {
     try {
       setActionLoading(true);
       await animalService.moveToBatch(animalId, batchData);
-      addToast("✅ Animal movido al lote correctamente", "success");
+      alertService.success("Animal movido al lote correctamente", "Éxito");
       await fetchAnimals(); // Refresh list
       return true;
     } catch (err) {
       console.error("Error moving to batch:", err);
-      addToast("❌ Error al mover el animal al lote", "error");
+      alertService.error("Error al mover el animal al lote", "Error");
       return false;
     } finally {
       setActionLoading(false);
@@ -115,12 +118,12 @@ export function useAnimals() {
     try {
       setActionLoading(true);
       await animalService.markAsSold(animalId, saleData);
-      addToast("✅ Animal marcado como vendido", "success");
+      alertService.success("Animal marcado como vendido", "Éxito");
       await fetchAnimals(); // Refresh list
       return true;
     } catch (err) {
       console.error("Error marking as sold:", err);
-      addToast("❌ Error al marcar como vendido", "error");
+      alertService.error("Error al marcar como vendido", "Error");
       return false;
     } finally {
       setActionLoading(false);
@@ -132,12 +135,12 @@ export function useAnimals() {
     try {
       setActionLoading(true);
       await animalService.markAsDead(animalId, deathData);
-      addToast("✅ Animal marcado como fallecido", "success");
+      alertService.success("Animal marcado como fallecido", "Éxito");
       await fetchAnimals(); // Refresh list
       return true;
     } catch (err) {
       console.error("Error marking as dead:", err);
-      addToast("❌ Error al marcar como fallecido", "error");
+      alertService.error("Error al marcar como fallecido", "Error");
       return false;
     } finally {
       setActionLoading(false);
@@ -149,12 +152,12 @@ export function useAnimals() {
     try {
       setActionLoading(true);
       await animalService.registerMovement(animalId, movementData);
-      addToast("✅ Movimiento registrado correctamente", "success");
+      alertService.success("Movimiento registrado correctamente", "Éxito");
       await fetchAnimals(); // Refresh list
       return true;
     } catch (err) {
       console.error("Error registering movement:", err);
-      addToast("❌ Error al registrar el movimiento", "error");
+      alertService.error("Error al registrar el movimiento", "Error");
       return false;
     } finally {
       setActionLoading(false);
@@ -166,12 +169,12 @@ export function useAnimals() {
     try {
       setActionLoading(true);
       await animalService.deleteAnimal(animalId);
-      addToast("✅ Animal eliminado correctamente", "success");
+      alertService.success("Animal eliminado correctamente", "Éxito");
       await fetchAnimals(); // Refresh list
       return true;
     } catch (err) {
       console.error("Error deleting animal:", err);
-      addToast("❌ Error al eliminar el animal", "error");
+      alertService.error("Error al eliminar el animal", "Error");
       return false;
     } finally {
       setActionLoading(false);
