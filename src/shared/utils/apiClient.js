@@ -2,9 +2,7 @@ import axios from "axios";
 
 //Client API configured for the Gateway
 const apiClient = axios.create({
-  baseURL:
-    import.meta.env.VITE_API_GATEWAY_URL ||
-    "https://api-gateway-bio-tech.up.railway.app/api",
+  baseURL: "https://api-gateway-bio-tech.up.railway.app/api",
   timeout: 10000,
   headers: {
     "Content-Type": "application/json",
