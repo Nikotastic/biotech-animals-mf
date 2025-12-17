@@ -5,7 +5,19 @@ import { useAnimals } from "../hooks/useAnimals";
 
 export default function AnimalsList() {
   const navigate = useNavigate();
-  const { animals, loading, error } = useAnimals();
+  const {
+    animals,
+    loading,
+    error,
+    actionLoading,
+    refetch,
+    updateWeight,
+    moveToBatch,
+    markAsSold,
+    markAsDead,
+    registerMovement,
+    deleteAnimal,
+  } = useAnimals();
 
   const handleCreate = () => {
     navigate("/animals/create");
@@ -37,7 +49,7 @@ export default function AnimalsList() {
           <p className="font-bold">Error</p>
           <p>{error}</p>
           <button
-            onClick={() => window.location.reload()}
+            onClick={refetch}
             className="mt-2 text-sm underline hover:text-red-800"
           >
             Reintentar
@@ -50,9 +62,16 @@ export default function AnimalsList() {
   return (
     <AnimalsListView
       animals={animals}
+      actionLoading={actionLoading}
       onCreate={handleCreate}
       onViewDetails={handleViewDetails}
       onEdit={handleEdit}
+      onUpdateWeight={updateWeight}
+      onMoveToBatch={moveToBatch}
+      onMarkAsSold={markAsSold}
+      onMarkAsDead={markAsDead}
+      onRegisterMovement={registerMovement}
+      onDelete={deleteAnimal}
     />
   );
 }

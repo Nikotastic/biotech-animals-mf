@@ -13,7 +13,19 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-export function AnimalsListView({ animals, onViewDetails, onEdit, onCreate }) {
+export function AnimalsListView({
+  animals,
+  onViewDetails,
+  onEdit,
+  onCreate,
+  onDelete,
+  actionLoading,
+  onUpdateWeight,
+  onMoveToBatch,
+  onMarkAsSold,
+  onMarkAsDead,
+  onRegisterMovement,
+}) {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
   const [viewMode, setViewMode] = useState("grid");
@@ -349,7 +361,19 @@ export function AnimalsListView({ animals, onViewDetails, onEdit, onCreate }) {
                           <Edit2 className="w-4 h-4" />
                           <span>Editar</span>
                         </button>
-                        <button className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all">
+                        <button
+                          onClick={() => {
+                            if (
+                              window.confirm(
+                                "¿Estás seguro de eliminar este animal?"
+                              )
+                            ) {
+                              onDelete?.(animal.id);
+                            }
+                          }}
+                          disabled={actionLoading}
+                          className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all disabled:opacity-50"
+                        >
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
@@ -450,7 +474,19 @@ export function AnimalsListView({ animals, onViewDetails, onEdit, onCreate }) {
                           >
                             <Edit2 className="w-5 h-5" />
                           </button>
-                          <button className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all">
+                          <button
+                            onClick={() => {
+                              if (
+                                window.confirm(
+                                  "¿Estás seguro de eliminar este animal?"
+                                )
+                              ) {
+                                onDelete?.(animal.id);
+                              }
+                            }}
+                            disabled={actionLoading}
+                            className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all disabled:opacity-50"
+                          >
                             <Trash2 className="w-5 h-5" />
                           </button>
                         </div>

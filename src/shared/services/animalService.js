@@ -37,7 +37,29 @@ export const animalService = {
     }
   },
 
-  // Register animal movement
+  // Update existing animal
+  updateAnimal: async (id, animalData) => {
+    try {
+      const response = await apiClient.put(`/v1/animals/${id}`, animalData);
+      return response.data;
+    } catch (error) {
+      console.error(`Error updating animal ${id}:`, error);
+      throw error;
+    }
+  },
+
+  // Delete animal
+  deleteAnimal: async (id) => {
+    try {
+      const response = await apiClient.delete(`/v1/animals/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error deleting animal ${id}:`, error);
+      throw error;
+    }
+  },
+
+  // Register animal movement (e.g., pasture change)
   registerMovement: async (id, movementData) => {
     try {
       const response = await apiClient.post(
@@ -51,24 +73,52 @@ export const animalService = {
     }
   },
 
-  // Update existing animal (Note: Not explicitly listed in API docs provided, keeping for safety)
-  updateAnimal: async (id, animalData) => {
+  // Update animal weight
+  updateWeight: async (id, weightData) => {
     try {
-      const response = await apiClient.put(`/v1/animals/${id}`, animalData);
+      const response = await apiClient.put(
+        `/v1/animals/${id}/weight`,
+        weightData
+      );
       return response.data;
     } catch (error) {
-      console.error(`Error updating animal ${id}:`, error);
+      console.error(`Error updating weight for animal ${id}:`, error);
       throw error;
     }
   },
 
-  // Delete animal (Note: Not explicitly listed in API docs provided, keeping for safety)
-  deleteAnimal: async (id) => {
+  // Move animal to a different batch
+  moveToBatch: async (id, batchData) => {
     try {
-      const response = await apiClient.delete(`/v1/animals/${id}`);
+      const response = await apiClient.put(
+        `/v1/animals/${id}/batch`,
+        batchData
+      );
       return response.data;
     } catch (error) {
-      console.error(`Error deleting animal ${id}:`, error);
+      console.error(`Error moving animal ${id} to batch:`, error);
+      throw error;
+    }
+  },
+
+  // Mark animal as sold
+  markAsSold: async (id, saleData) => {
+    try {
+      const response = await apiClient.put(`/v1/animals/${id}/sell`, saleData);
+      return response.data;
+    } catch (error) {
+      console.error(`Error marking animal ${id} as sold:`, error);
+      throw error;
+    }
+  },
+
+  // Mark animal as dead
+  markAsDead: async (id, deathData) => {
+    try {
+      const response = await apiClient.put(`/v1/animals/${id}/dead`, deathData);
+      return response.data;
+    } catch (error) {
+      console.error(`Error marking animal ${id} as dead:`, error);
       throw error;
     }
   },
