@@ -1,4 +1,4 @@
-import apiClient from "../utils/apiClient";
+import apiService from "@shared-services/ApiService";
 
 export const animalService = {
   // Get list of animals
@@ -7,7 +7,7 @@ export const animalService = {
       const params = new URLSearchParams(filters).toString();
       // Base URL per backend: /v1/animals
       const url = params ? `/v1/animals?${params}` : "/v1/animals";
-      const response = await apiClient.get(url);
+      const response = await apiService.get(url);
       return response.data;
     } catch (error) {
       console.error("Error fetching animals:", error);
@@ -18,7 +18,7 @@ export const animalService = {
   // Get details of an animal
   getAnimalById: async (id) => {
     try {
-      const response = await apiClient.get(`/v1/animals/${id}`);
+      const response = await apiService.get(`/v1/animals/${id}`);
       return response.data;
     } catch (error) {
       console.error(`Error fetching animal ${id}:`, error);
@@ -29,7 +29,7 @@ export const animalService = {
   // Create new animal
   createAnimal: async (animalData) => {
     try {
-      const response = await apiClient.post("/v1/animals", animalData);
+      const response = await apiService.post("/v1/animals", animalData);
       return response.data;
     } catch (error) {
       console.error("Error creating animal:", error);
@@ -40,7 +40,7 @@ export const animalService = {
   // Update existing animal
   updateAnimal: async (id, animalData) => {
     try {
-      const response = await apiClient.put(`/v1/animals/${id}`, animalData);
+      const response = await apiService.put(`/v1/animals/${id}`, animalData);
       return response.data;
     } catch (error) {
       console.error(`Error updating animal ${id}:`, error);
@@ -51,7 +51,7 @@ export const animalService = {
   // Delete animal
   deleteAnimal: async (id) => {
     try {
-      const response = await apiClient.delete(`/v1/animals/${id}`);
+      const response = await apiService.delete(`/v1/animals/${id}`);
       return response.data;
     } catch (error) {
       console.error(`Error deleting animal ${id}:`, error);
@@ -62,7 +62,7 @@ export const animalService = {
   // Register animal movement (e.g., pasture change)
   registerMovement: async (id, movementData) => {
     try {
-      const response = await apiClient.post(
+      const response = await apiService.post(
         `/v1/animals/${id}/movements`,
         movementData
       );
@@ -76,7 +76,7 @@ export const animalService = {
   // Update animal weight
   updateWeight: async (id, weightData) => {
     try {
-      const response = await apiClient.put(
+      const response = await apiService.put(
         `/v1/animals/${id}/weight`,
         weightData
       );
@@ -90,7 +90,7 @@ export const animalService = {
   // Move animal to a different batch
   moveToBatch: async (id, batchData) => {
     try {
-      const response = await apiClient.put(
+      const response = await apiService.put(
         `/v1/animals/${id}/batch`,
         batchData
       );
@@ -104,7 +104,7 @@ export const animalService = {
   // Mark animal as sold
   markAsSold: async (id, saleData) => {
     try {
-      const response = await apiClient.put(`/v1/animals/${id}/sell`, saleData);
+      const response = await apiService.put(`/v1/animals/${id}/sell`, saleData);
       return response.data;
     } catch (error) {
       console.error(`Error marking animal ${id} as sold:`, error);
@@ -115,7 +115,10 @@ export const animalService = {
   // Mark animal as dead
   markAsDead: async (id, deathData) => {
     try {
-      const response = await apiClient.put(`/v1/animals/${id}/dead`, deathData);
+      const response = await apiService.put(
+        `/v1/animals/${id}/dead`,
+        deathData
+      );
       return response.data;
     } catch (error) {
       console.error(`Error marking animal ${id} as dead:`, error);
@@ -125,7 +128,7 @@ export const animalService = {
   // Get breeds
   getBreeds: async () => {
     try {
-      const response = await apiClient.get("/v1/breeds");
+      const response = await apiService.get("/v1/breeds");
       return response.data;
     } catch (error) {
       console.error("Error fetching breeds:", error);
@@ -136,7 +139,7 @@ export const animalService = {
   // Get categories
   getCategories: async () => {
     try {
-      const response = await apiClient.get("/v1/categories");
+      const response = await apiService.get("/v1/categories");
       return response.data;
     } catch (error) {
       console.error("Error fetching categories:", error);
@@ -149,7 +152,7 @@ export const animalService = {
     try {
       const params = new URLSearchParams(filters).toString();
       const url = params ? `/v1/paddocks?${params}` : "/v1/paddocks";
-      const response = await apiClient.get(url);
+      const response = await apiService.get(url);
       return response.data;
     } catch (error) {
       console.error("Error fetching paddocks:", error);
@@ -162,7 +165,7 @@ export const animalService = {
     try {
       const params = new URLSearchParams(filters).toString();
       const url = params ? `/v1/batches?${params}` : "/v1/batches";
-      const response = await apiClient.get(url);
+      const response = await apiService.get(url);
       return response.data;
     } catch (error) {
       console.error("Error fetching batches:", error);
@@ -172,7 +175,7 @@ export const animalService = {
   // Get movement types
   getMovementTypes: async () => {
     try {
-      const response = await apiClient.get("/v1/movement-types");
+      const response = await apiService.get("/v1/movement-types");
       return response.data;
     } catch (error) {
       console.error("Error fetching movement types:", error);
