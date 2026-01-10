@@ -62,22 +62,6 @@ export default function AnimalsList() {
     );
   }
 
-  if (error) {
-    return (
-      <div className="p-8 text-center">
-        <div className="bg-red-50 text-red-600 p-4 rounded-xl border border-red-200 inline-block">
-          <p className="font-bold">Error</p>
-          <p>{error}</p>
-          <button
-            onClick={refetch}
-            className="mt-2 text-sm underline hover:text-red-800"
-          >
-            Reintentar
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <AnimalsListView
